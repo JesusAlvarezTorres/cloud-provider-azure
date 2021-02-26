@@ -32,6 +32,9 @@ type Config struct {
 	// the node name
 	NodeName string
 
+	// Specifies if node information is retrieved via IMDS or ARM.
+	UseInstanceMetadata bool
+
 	// NodeStatusUpdateFrequency is the frequency at which the controller updates nodes' status
 	NodeStatusUpdateFrequency metav1.Duration
 

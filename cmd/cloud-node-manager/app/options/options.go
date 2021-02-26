@@ -61,9 +61,10 @@ const (
 
 // CloudNodeManagerOptions is the main context object for the controller manager.
 type CloudNodeManagerOptions struct {
-	Master     string
-	Kubeconfig string
-	NodeName   string
+	Master              string
+	Kubeconfig          string
+	NodeName            string
+	UseInstanceMetadata bool
 
 	SecureServing   *apiserveroptions.SecureServingOptionsWithLoopback
 	InsecureServing *apiserveroptions.DeprecatedInsecureServingOptionsWithLoopback
@@ -124,6 +125,7 @@ func (o *CloudNodeManagerOptions) Flags() cliflag.NamedFlagSets {
 	fs.StringVar(&o.ClientConnection.ContentType, "kube-api-content-type", o.ClientConnection.ContentType, "Content type of requests sent to apiserver.")
 	fs.Float32Var(&o.ClientConnection.QPS, "kube-api-qps", 20, "QPS to use while talking with kubernetes apiserver.")
 	fs.Int32Var(&o.ClientConnection.Burst, "kube-api-burst", 30, "Burst to use while talking with kubernetes apiserver.")
+	fs.BoolVar(&o.UseInstanceMetadata, "use-instance-metadata", true, "Should use Instance Metadata Service for fetching node information; if false will use ARM instead.")
 	return fss
 }
 
@@ -170,6 +172,7 @@ func (o *CloudNodeManagerOptions) ApplyTo(c *cloudnodeconfig.Config, userAgent s
 	// TODO(feiskyer): filter watch by node name whenever it's supported.
 	c.SharedInformers = informers.NewSharedInformerFactory(c.VersionedClient, resyncPeriod(c)())
 	c.NodeStatusUpdateFrequency = o.NodeStatusUpdateFrequency
+	c.UseInstanceMetadata = o.UseInstanceMetadata
 
 	// Default NodeName is hostname.
 	c.NodeName = strings.ToLower(o.NodeName)
