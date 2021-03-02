@@ -65,6 +65,7 @@ type CloudNodeManagerOptions struct {
 	Kubeconfig          string
 	NodeName            string
 	UseInstanceMetadata bool
+	CloudConfigFilePath string
 
 	SecureServing   *apiserveroptions.SecureServingOptionsWithLoopback
 	InsecureServing *apiserveroptions.DeprecatedInsecureServingOptionsWithLoopback
@@ -126,6 +127,7 @@ func (o *CloudNodeManagerOptions) Flags() cliflag.NamedFlagSets {
 	fs.Float32Var(&o.ClientConnection.QPS, "kube-api-qps", 20, "QPS to use while talking with kubernetes apiserver.")
 	fs.Int32Var(&o.ClientConnection.Burst, "kube-api-burst", 30, "Burst to use while talking with kubernetes apiserver.")
 	fs.BoolVar(&o.UseInstanceMetadata, "use-instance-metadata", true, "Should use Instance Metadata Service for fetching node information; if false will use ARM instead.")
+	fs.StringVar(&o.CloudConfigFilePath, "cloud-config", o.CloudConfigFilePath, "The path to the cloud config file to be used when using ARM to fetch node information.")
 	return fss
 }
 
@@ -173,6 +175,7 @@ func (o *CloudNodeManagerOptions) ApplyTo(c *cloudnodeconfig.Config, userAgent s
 	c.SharedInformers = informers.NewSharedInformerFactory(c.VersionedClient, resyncPeriod(c)())
 	c.NodeStatusUpdateFrequency = o.NodeStatusUpdateFrequency
 	c.UseInstanceMetadata = o.UseInstanceMetadata
+	c.CloudConfigFilePath = o.CloudConfigFilePath
 
 	// Default NodeName is hostname.
 	c.NodeName = strings.ToLower(o.NodeName)

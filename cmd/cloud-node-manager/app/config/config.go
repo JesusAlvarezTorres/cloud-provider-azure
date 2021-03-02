@@ -35,6 +35,9 @@ type Config struct {
 	// Specifies if node information is retrieved via IMDS or ARM.
 	UseInstanceMetadata bool
 
+	// the path to the config file (azure.json) for use in ARM mode.
+	CloudConfigFilePath string
+
 	// NodeStatusUpdateFrequency is the frequency at which the controller updates nodes' status
 	NodeStatusUpdateFrequency metav1.Duration
 

@@ -17,8 +17,8 @@ limitations under the License.
 package node
 
 import (
-	"bytes"
 	"context"
+	"os"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -33,13 +33,27 @@ type ARMNodeProvider struct {
 }
 
 // NewARMNodeProvider creates a new ARMNodeProvider.
-func NewARMNodeProvider() *ARMNodeProvider {
-	az, err := azureprovider.NewCloud(bytes.NewBuffer([]byte(`{
-			"useInstanceMetadata": true,
-			"vmType": "vmss"
-		}`)))
-	if err != nil {
-		klog.Fatalf("Failed to initialize Azure cloud provider: %v", err)
+func NewARMNodeProvider(cloudConfigFilePath string) *ARMNodeProvider {
+
+	var err error
+	var configFile *os.File
+	var az cloudprovider.Interface
+
+	if cloudConfigFilePath != "" {
+		configFile, err = os.Open(cloudConfigFilePath)
+		if err != nil {
+			klog.Fatalf("Could not open cloud config file %s: %#v", cloudConfigFilePath, err)
+		}
+		defer configFile.Close()
+
+		az, err = azureprovider.NewCloud(configFile)
+
+		if err != nil {
+			klog.Fatalf("Failed to initialize Azure cloud provider: %v", err)
+		}
+
+	} else {
+		klog.Fatal("Cloud config file path is empty, use --cloud-config argument when using ARM node provider.")
 	}
 
 	return &ARMNodeProvider{

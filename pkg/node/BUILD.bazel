@@ -4,7 +4,8 @@ go_library(
     name = "go_default_library",
     srcs = [
         "node.go",
-        "node_arm.go"
+        "nodearm.go",
+        "nodeproviderfactory.go"
         ],
     importpath = "sigs.k8s.io/cloud-provider-azure/pkg/node",
     visibility = ["//visibility:public"],

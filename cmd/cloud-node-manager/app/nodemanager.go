@@ -130,26 +130,13 @@ func startControllers(c *cloudnodeconfig.Config, stopCh <-chan struct{}) error {
 	klog.V(1).Infof("Starting cloud-node-manager...")
 
 	var nodeController *nodemanager.CloudNodeController
-
-	if c.UseInstanceMetadata {
-		// Start the CloudNodeController with IMDS node provider
-		nodeController = nodemanager.NewCloudNodeController(
-			c.NodeName,
-			c.SharedInformers.Core().V1().Nodes(),
-			// cloud node controller uses existing cluster role from node-controller
-			c.ClientBuilder.ClientOrDie("node-controller"),
-			nodeprovider.NewIMDSNodeProvider(),
-			c.NodeStatusUpdateFrequency.Duration)
-	} else {
-		// Start the CloudNodeController with ARM node provider
-		nodeController = nodemanager.NewCloudNodeController(
-			c.NodeName,
-			c.SharedInformers.Core().V1().Nodes(),
-			// cloud node controller uses existing cluster role from node-controller
-			c.ClientBuilder.ClientOrDie("node-controller"),
-			nodeprovider.NewARMNodeProvider(),
-			c.NodeStatusUpdateFrequency.Duration)
-	}
+	nodeController = nodemanager.NewCloudNodeController(
+		c.NodeName,
+		c.SharedInformers.Core().V1().Nodes(),
+		// cloud node controller uses existing cluster role from node-controller
+		c.ClientBuilder.ClientOrDie("node-controller"),
+		nodeprovider.NewNodeProvider(c.UseInstanceMetadata, c.CloudConfigFilePath),
+		c.NodeStatusUpdateFrequency.Duration)
 
 	go nodeController.Run(stopCh)
 
